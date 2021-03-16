@@ -16,15 +16,14 @@ public class task {
 
     private static final String DELIMITER = " ";
 
-    private static final int TARGET = 13;
 
     /**
-     * Prints statistics for List of integers.
-     * When executed without filename as first argument, random int stream is used.
-     *
-     * @param args 0 - filename
+     * Prints pairs that meets the target
+     * If no target is provided, default 13 is used.
+     * @param args 0 - filename, 1 - target
      */
     public static void main(String[] args) {
+        int target = 13;
         List<Integer> list;
 
         //checks whether arguments has been passed
@@ -34,6 +33,9 @@ public class task {
                         .parallelStream()
                         .flatMap(line -> Arrays.stream(line.split(DELIMITER)).map(x -> Integer.valueOf(x.trim()))) // flat map list of lines into stream of single integers
                         .collect(Collectors.toList()); // collect to list
+
+                if (args.length > 1)
+                    target = Integer.parseInt(args[1]);
             } catch (IOException e) {
                 e.printStackTrace();
                 return;
@@ -46,10 +48,10 @@ public class task {
                     .collect(Collectors.toList());
         }
 
-        printPairs(list);
+        printPairs(list, target);
     }
 
-    private static void printPairs(List<Integer> list) {
+    private static void printPairs(List<Integer> list, int target) {
         //convert list to array for easier index access
         Integer[] array = list.toArray(new Integer[0]);
 
@@ -63,7 +65,7 @@ public class task {
             for (int j = i + 1; j < array.length; j++) {
                 Integer second_number = array[j];
                 // if sum of numbers meets the target add to result List
-                if (first_number + second_number == TARGET) {
+                if (first_number + second_number == target) {
                     results.add(new Integer[]{Math.min(first_number, second_number), Math.max(first_number, second_number)});
                 }
             }
