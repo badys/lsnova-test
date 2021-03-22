@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Piotr Badysiak
@@ -19,7 +21,7 @@ public class task {
      * @param args 0 - filename
      */
     public static void main(String[] args) {
-        List<int[]> list = new ArrayList<>();
+        List<Integer[]> list = new ArrayList<>();
 
         //checks whether arguments has been passed
         if (args.length > 0) {
@@ -31,7 +33,7 @@ public class task {
                 //reads line and adds int array to list
                 for (int i = 0; i < n; i++) {
                     String[] line = br.readLine().split(DELIMITER);
-                    list.add(new int[]{Integer.parseInt(line[0]), Integer.parseInt(line[1])});
+                    list.add(new Integer[]{Integer.parseInt(line[0]), Integer.parseInt(line[1])});
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -45,21 +47,37 @@ public class task {
         printGraphCount(list);
     }
 
-    private static void printGraphCount(List<int[]> list) {
+    private static void printGraphCount(List<Integer[]> list) {
         int count = 0;
 
-        //set with values
-        Set<Integer> uniqueVertices = new HashSet<>();
+        //set with visited vertices
+        Set<Integer> checked = new HashSet<>();
 
-        for (int[] pair : list) {
-            // if both values are unique that means it is separate graph
-            boolean added = uniqueVertices.add(pair[0]);
-            added &= uniqueVertices.add(pair[1]);
-            if (added)
-                count++;
+        for (Integer[] pair : list) {
+            for (Integer current : pair) {
+                if (checked.add(current)) {
+                    traverseGraph(checked, list, current);
+                    count++;
+                }
+            }
         }
 
         System.out.println(count);
+    }
+
+    private static void traverseGraph(Set<Integer> checked, List<Integer[]> list, Integer current) {
+        Set<Integer> adjacentVertices = list
+                .stream()
+                .filter(x -> x[0].equals(current) || x[1].equals(current)) // filter list for pairs that contains current value
+                .flatMap(Stream::of) // flatmap stream from Integer[] to Integer
+                .filter(x -> !checked.contains(x)) // exclude values already checked
+                .collect(Collectors.toSet());
+
+        checked.addAll(adjacentVertices);
+
+        for (Integer adjacent : adjacentVertices) {
+            traverseGraph(checked, list, adjacent); // recursive call for other values
+        }
     }
 }
 
